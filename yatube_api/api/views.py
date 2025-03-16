@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from posts.models import Group, Post, Comment
+from posts.models import Group, Post
 from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from .permissions import IsAuthorOrReadOnly
@@ -21,8 +21,10 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = LimitOffsetPagination
-    # Для создания/изменения постов требуем авторизацию, для чтения – доступен всем.
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorOrReadOnly,
+    ]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -30,9 +32,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    # Для комментариев также требуем, чтобы неавторизованным было запрещено создавать,
-    # а изменение мог только автор.
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorOrReadOnly,
+    ]
 
     def get_queryset(self):
         post = get_object_or_404(Post, pk=self.kwargs.get("post_id"))
